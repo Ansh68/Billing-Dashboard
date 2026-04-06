@@ -6,7 +6,7 @@ import helmet from 'helmet';
 const app = express();
 
 app.use(cors({
-    "origin": process.env.CORS_ORIGIN,
+    "origin": "*",
     "credentials": true
 }));
 
