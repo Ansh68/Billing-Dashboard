@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model  Customer {
+  id             String   @id @default(uuid())
+  name           String
+  address        String
+  panCard        String   @unique
+  gstNumber      String?  @unique
+  isActive       Boolean @default(true)
+  createdAt      DateTime @default(now())
+
+  invoices       Invoice[]
+}
+
+model  Item {
+  id           String    @id @default(uuid())
+  name         String
+  price        Float
+  description  String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  invoiceItems InvoiceItem[]
+}
+
+model Invoice {
+  id            String         @id @default(uuid())
+  invoiceId     String         @unique
+  customerId    String
+  subtotal      Float
+  gstAmount     Float
+  totalAmount   Float
+  createdAt     DateTime       @default(now())
+
+  customer      Customer       @relation(fields: [customerId], references: [id])
+  items         InvoiceItem[]
+
+  @@index([invoiceId])
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  itemId      String
+
+  quantity    Int
+  price       Float
+  total       Float
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  item        Item    @relation(fields: [itemId], references: [id])
+
+  @@index([invoiceId])
+  @@index([itemId])
+}
